@@ -8,7 +8,7 @@ void printStr(char * str,int size) ;
 
 typedef struct File
 {
-	char filename[12];
+	char filename[13];
 	int attribute;
 	int firstClus;
 	struct 	File * files[20];
@@ -68,7 +68,7 @@ int main(){
 
 	
 	while(1){
-	
+		printStr("> ",2);
 		char ins[256]={0};
 		gets(ins);
 		char ope[6] = {0};
@@ -93,7 +93,7 @@ int main(){
 		int cmp = strcasecmp(ope_exit,ope);
 		if (cmp==0)
 		{	
-			printStr("program is end\n",16);
+			printStr("program is at an end\n",22);
 			break;
 		}
 		cmp =  strcasecmp(ope_ls,ope);
@@ -114,6 +114,7 @@ int main(){
 			}
 			if(f_1->attribute==0x10)
 			{lsDir(param,f_1);
+				continue;
 			}else{
 				printStr(param,strlen(param));
 				printStr(" is a file\n",14);
@@ -122,20 +123,51 @@ int main(){
 		}
 		cmp = strcasecmp(ope_count,ope);
 		if (0==cmp)
-		{
-			File * f_2 =  getfile(param,files);
+		{	File * f_2 = NULL;
+		 	f_2 =  getfile(param,files);
 			if(f_2!=NULL)
-			countDir(f_2);
+			{	if(f_2->attribute==0x10)
+				{
+
+				countDir(f_2);
+				f_2 = NULL;
+				}	
+				else
+				{
+				printStr(param,strlen(param));
+				printStr(" is not a dir\n",14);
+				}
+				continue;
+			}else{
+				printStr(param,strlen(param));
+				printStr(" is not a dir\n",14);
+				continue;
+			}
+			free(f_2);
 		continue;
 		}
+
+
 		cmp = strcasecmp(ope_cat,ope);
 		if (0==cmp)
 		{
 			File * f_2 =  getfile(param,files);
 			if(f_2!=NULL)
+			{
+			if(f_2->attribute==0x20)	
 			cat(f_2);
+			else
+				{printStr(param,strlen(param));
+				printStr(" is not a file\n",15);
+			}
+			
+			}else{
+				printStr(param,strlen(param));
+				printStr(" is not a file\n",15);
+			}
 		continue;
 		}
+		printStr("error instrustion,please input again: \n",40);
 	
 	}
 	
@@ -160,12 +192,15 @@ char * intToChar(int number){
 	printStr(str,5);
 	return NULL;
 }
+
 void countDir(File * f){
 	int data[2]= {0,0};
+	//data 0 is number of dir data 1 is number of file
 	if (f->attribute!=0x10)
 	{
 		printStr(f->filename,12);
 		printStr("is not a dir",14);
+		return;
 	}
 	countNums(f,data);
 	printStr(f->filename,strlen(f->filename));
@@ -189,6 +224,7 @@ void countDir(File * f){
 		index++;
 	}
 };
+
 int * countNums(File * f,int * data){
 	int index = 0;
 	while(f->files[index]!=NULL){
@@ -257,8 +293,8 @@ void lsDir(char * prefix,File * f){
 	printStr(prefix,len);
 	printStr(":\n",2);
 	if (!isDir)
-	{
-		printf("%s is not a dir\n",f->filename);
+	{	printStr(f->filename,strlen(f->filename));
+		printStr(" is not a dir\n",14);
 	}
 	int index =0 ;
 	while(f->files[index]!=NULL){
@@ -298,7 +334,7 @@ File * getfile(char * str, File ** files){
 	// printf("%s\n",str );
 	File ** p = files;
 	char filename[12] = {0};
-	File * f;
+	File * f = NULL;
 	char s = '/';
 	int index = 0;
 
@@ -400,7 +436,7 @@ File * initFile(int offset){
 		return NULL;
 
 	
-	char realnames[12]={0};
+	char realnames[13]={0};
 
 	int index = 0;
 	for (int i = 0; i < 8; ++i)
