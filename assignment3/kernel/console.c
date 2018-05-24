@@ -140,7 +140,7 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 		if (p_con->cursor > p_con->original_addr) {
 			if(*(p_vmem-2)==tab && p_con->cursor % SCREEN_WIDTH != 0)
 			{
-				while(*(p_vmem-2)==tab){
+				while(*(p_vmem-2) == tab && p_con->cursor % SCREEN_WIDTH != 0){
 					*(p_vmem-2) = '\0';
 					*(p_vmem-1) = DEFAULT_CHAR_COLOR;
 					p_con->cursor--;
