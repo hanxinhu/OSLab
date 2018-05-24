@@ -51,8 +51,11 @@ realclean :
 
 disasm :
 	$(DASM) $(DASMFLAGS) $(ORANGESKERNEL) > $(DASMOUTPUT)
-run : realclean everything clean buildimg
-		bochs -f bochsrc
+build : realclean everything clean buildimg
+		
+run:
+	bochs -f bochsrc
+
 # We assume that "a.img" exists in current folder
 buildimg :
 	dd if=boot/boot.bin of=a.img bs=512 count=1 conv=notrunc

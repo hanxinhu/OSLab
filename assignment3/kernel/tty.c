@@ -25,7 +25,6 @@ PRIVATE void init_tty(TTY* p_tty);
 PRIVATE void tty_do_read(TTY* p_tty);
 PRIVATE void tty_do_write(TTY* p_tty);
 PRIVATE void put_key(TTY* p_tty, u32 key);
-
 PRIVATE int isSearch;
 PRIVATE char search[32] = {0} ;
 PRIVATE int isEnter;
@@ -34,6 +33,8 @@ PRIVATE int length;
 /*======================================================================*
                            task_tty
  *======================================================================*/
+CONSOLE* p_con;
+
 PUBLIC void task_tty()
 {
 	TTY*	p_tty;
@@ -47,15 +48,29 @@ PUBLIC void task_tty()
 	isEnter = 0;
 	length = 0;
 	select_console(0);
-	int start_time = get_ticks();
-	while (1) {	
+	
+	
+	while (1) {		
 		 for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
 		 	tty_do_read(p_tty);
 		 	tty_do_write(p_tty);
+		 	p_con = p_tty -> p_console;
 		 }
 	}
 }
 
+PUBLIC void clean(){
+	
+	while(1)
+	{	
+		if(p_con !=NULL)
+			if(!isSearch)
+			{
+				clearALL(p_con);
+			}	
+		milli_delay(20 * 1000);
+	}
+}
 /*======================================================================*
 			   init_tty
  *======================================================================*/
@@ -72,7 +87,7 @@ PRIVATE void init_tty(TTY* p_tty)
  *======================================================================*/
 PUBLIC void in_process(TTY* p_tty, u32 key)
 {
-        char output[2] = {'\0', '\0'};
+        char output[2] = {'\0', '\0'}	;
        	
         if (!(key & FLAG_EXT)) {
         	if (!(isSearch && isEnter ))
@@ -133,7 +148,9 @@ PUBLIC void in_process(TTY* p_tty, u32 key)
 				scroll_screen(p_tty->p_console, SCR_UP);
 			}
 			break;
-		
+			case TAB:
+					put_key(p_tty, '\t');
+					break;
             default:
                       break;
             }

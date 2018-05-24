@@ -229,6 +229,8 @@ PUBLIC void keyboard_read(TTY* p_tty)
 					case PAD_ENTER:
 						key = ENTER;
 						break;
+					
+
 					default:
 						if (num_lock &&
 						    (key >= PAD_0) &&

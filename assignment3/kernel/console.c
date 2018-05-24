@@ -21,6 +21,8 @@
 #include "global.h"
 #include "keyboard.h"
 #include "proto.h"
+#define tabSize 8
+#define tab '\0'
 
 PRIVATE void set_cursor(unsigned int position);
 PRIVATE void set_video_start_addr(u32 addr);
@@ -49,7 +51,7 @@ PUBLIC void init_screen(TTY* p_tty)
 
 		for (int i = 0; i < 80 * 25; ++i)
 		{
-			out_char(p_tty->p_console, ' ');
+			out_char(p_tty->p_console, '\0');
 			/* code */
 		}
 		// /* 第一个控制台沿用原来的光标位置 */
@@ -120,15 +122,76 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 			p_con->cursor = p_con->original_addr + SCREEN_WIDTH * 
 				((p_con->cursor - p_con->original_addr) /
 				 SCREEN_WIDTH + 1);
+
 		}
+			// {
+			// 	for (int i = 0; i < 128; ++i)
+			// 	{
+			// *p_vmem++ = i;
+			// *p_vmem++ = DEFAULT_CHAR_COLOR;
+			// p_con->cursor++;
+			// 	}
+			
+			// }
+			
 		break;
 	case '\b':
 		// clearALL(p_con);		
 		if (p_con->cursor > p_con->original_addr) {
+			if(*(p_vmem-2)==tab && p_con->cursor % SCREEN_WIDTH != 0)
+			{
+				while(*(p_vmem-2)==tab){
+					*(p_vmem-2) = '\0';
+					*(p_vmem-1) = DEFAULT_CHAR_COLOR;
+					p_con->cursor--;
+					p_vmem -= 2;
+				}
+			}
+			else if (*(p_vmem-2)=='\0' && p_con->cursor % SCREEN_WIDTH == 0){
+					int i = 0;
+					while(*(p_vmem-2)=='\0'){
+					*(p_vmem-2) = '\0';
+					*(p_vmem-1) = DEFAULT_CHAR_COLOR;
+					p_con->cursor--;
+					p_vmem -= 2;
+					i++;
+					if(i >= SCREEN_WIDTH)
+						break;
+				}
+			}
+					
+			else{
+
 			p_con->cursor--;
 			*(p_vmem-2) = ' ';
 			*(p_vmem-1) = DEFAULT_CHAR_COLOR;
+			}
 		}
+		break;
+	case '\t':
+		{int leftSize = 0;
+		leftSize =  p_con->cursor % SCREEN_WIDTH;
+		if(*(p_vmem - 80*2 )==' ' || *(p_vmem - 80*2) == tab)
+		for (int i = 0; i < tabSize && i < SCREEN_WIDTH - leftSize ; ++i)
+		{
+			if(*(p_vmem - 80*2 )==' ' || *(p_vmem - 80*2) == tab){
+				*p_vmem++ = tab;
+				*p_vmem++ = DEFAULT_CHAR_COLOR; 
+				p_con->cursor++;
+			}else{
+				break;
+			}
+		
+		}
+		else{
+			for (int i = 0; i < tabSize && i < SCREEN_WIDTH - leftSize ; ++i)
+		{
+				*p_vmem++ = tab;
+				*p_vmem++ = DEFAULT_CHAR_COLOR; 
+				p_con->cursor++;
+		}
+		}
+	}
 		break;
 	default:
 		if (p_con->cursor <
@@ -163,7 +226,7 @@ PUBLIC void out_char_blue(CONSOLE* p_con, char ch)
 		// clearALL(p_con);		
 		if (p_con->cursor > p_con->original_addr) {
 			p_con->cursor--;
-			*(p_vmem-2) = ' ';
+			*(p_vmem-2) = '\0';
 			*(p_vmem-1) = CHAR_BLUE;
 		}
 		break;
@@ -199,7 +262,7 @@ PUBLIC void clearALL(CONSOLE* p_con){
 	u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
 	while (p_con->cursor >
 		    (p_con -> original_addr + 80)) {
-			*(p_vmem-2) = ' ';
+			*(p_vmem-2) = '\0';
 			*(p_vmem-1) = DEFAULT_CHAR_COLOR;
 			p_vmem -= 2;
 			p_con->cursor--;

@@ -26,6 +26,8 @@ void TestA();
 void TestB();
 void TestC();
 
+
+
 /* i8259.c */
 PUBLIC void put_irq_handler(int irq, irq_handler handler);
 PUBLIC void spurious_irq(int irq);
@@ -48,7 +50,7 @@ PUBLIC void scroll_screen(CONSOLE* p_con, int direction);
 PUBLIC void searchStr(CONSOLE* p_con, char * p,int length);
 PUBLIC void returnToDefault(CONSOLE* p_con);
 PUBLIC void clearALL(CONSOLE * p_con);
-
+PUBLIC void clean();
 
 /* 以下是系统调用相关 */
 
