@@ -20,6 +20,8 @@ int customer_id;
 int sleep = 1;
 SEMAPHORE customer, barber, mutex;
 
+void barber_process();
+void customer_process();
 void my_dispInt(int x){
     char str[5] = {0};
     for (int i = 3; i >= 0; --i)
@@ -98,7 +100,7 @@ PUBLIC int kernel_main()
 
 	p_proc_ready	= proc_table;
     proc_table[0].ticks = proc_table[0].priority =  10;
-    proc_table[1].ticks = proc_table[1].priority =  15;
+    proc_table[1].ticks = proc_table[1].priority =  20;
     proc_table[2].ticks = proc_table[2].priority =  16;
     proc_table[3].ticks = proc_table[3].priority =  17;
     proc_table[4].ticks = proc_table[4].priority =  18;
@@ -127,66 +129,21 @@ PUBLIC int kernel_main()
         while(1){}
 }
 
-/*======================================================================*
-                               TestA
- *======================================================================*/
-void A()
-{
-        while (1) {            
-        }
-}
-
-void B()
-{
-    my_disp_str("Barber is sleeping\n");
+void barber_process(){
+        my_disp_str("I, Barber, am sleeping\n");
     while(1){
-
         sem_p(&customer);
         if(sleep > 0){
             sleep = 0;
             my_disp_str("Barber wakes up\n");
         }
         my_disp_str("Barber cuts hair...\n");
-        process_sleep(40000);
+        process_sleep(40000);/* hari is being cut*/
         my_disp_str("Barber'work done!\n");
-
         sem_v(&barber);
     }
 }
-
-void C()
-{
-    while (1) {
-        sem_p(&mutex);
-        customer_id++;
-        int id = customer_id;
-        my_disp_str("customer ");
-        my_dispInt(id);
-        if (waiting >= CHAIR_NUM) {
-            my_disp_str(" leave, there is no chair left\n");
-            sem_v(&mutex);
-        } else {
-            waiting++;
-            my_disp_str(" sit down, and wait\n");
-            sem_v(&mutex);
-
-            sem_v(&customer);
-            sem_p(&barber);
-
-            my_disp_str("customer ");
-            my_dispInt(id);
-            my_disp_str(" got haircut, leave\n");
-
-            sem_p(&mutex);
-            waiting--;
-            sem_v(&mutex);
-        }
-        process_sleep(10000);
-    }
-}
-
-void D()
-{
+void customer_process(){
      while (1) {
         sem_p(&mutex);
         customer_id++;
@@ -200,47 +157,42 @@ void D()
             waiting++;
             my_disp_str(" sit down, and wait\n");
             sem_v(&mutex);
-
             sem_v(&customer);
             sem_p(&barber);
-
             my_disp_str("customer ");
             my_dispInt(id);
             my_disp_str(" got haircut, leave\n");
-
             sem_p(&mutex);
             waiting--;
             sem_v(&mutex);
         }
         process_sleep(10000);
-       
     }
+}
+/*======================================================================*
+                               TestA
+ *======================================================================*/
+void A()
+{
+        while (1) {            
+        }
+}
+
+void B()
+{
+    barber_process();
+}
+
+void C()
+{
+   customer_process();
+}
+
+void D()
+{
+     customer_process();
 }
 void E()
 {
-    while (1) {
-        sem_p(&mutex);
-        customer_id++;
-        int id = customer_id;
-        my_disp_str("customer ");
-        my_dispInt(id);
-        if (waiting >= CHAIR_NUM) {
-            my_disp_str(" leave, there is no chair left\n");
-            sem_v(&mutex);
-        } else {
-            waiting++;
-            my_disp_str(" sit down, and wait\n");
-            sem_v(&mutex);
-            sem_v(&customer);
-            sem_p(&barber);
-            my_disp_str("customer ");
-            my_dispInt(id);
-            my_disp_str(" got haircut, leave\n");
-
-            sem_p(&mutex);
-            waiting--;
-            sem_v(&mutex);
-        }
-        process_sleep(10000);
-    }
+    customer_process();
 }
