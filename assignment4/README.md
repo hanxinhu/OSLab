@@ -47,4 +47,4 @@ PUBLIC  void    sem_v(SEMAPHORE*);
 
 6. 实现ABCDE五个进程，并增加my_dispInt方法用来输出整数
 
-其中 B是理发师，CDE是顾客进程
+新增方法barber_process,customer_process;
